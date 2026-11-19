@@ -95,6 +95,7 @@ do $$ declare t text; begin
     execute format('revoke all on %I from public', t);
     if exists (select 1 from pg_roles where rolname = 'anon') then execute format('revoke all on %I from anon', t); end if;
     if exists (select 1 from pg_roles where rolname = 'authenticated') then execute format('revoke all on %I from authenticated', t); end if;
+    if exists (select 1 from pg_roles where rolname = 'service_role') then execute format('grant all on %I to service_role', t); end if;
   end loop;
 end $$;
 
@@ -321,6 +322,7 @@ $$;
 do $$ declare f record; begin
   for f in select p.oid::regprocedure as sig from pg_proc p join pg_namespace n on n.oid = p.pronamespace
            where n.nspname = 'public' and p.proname like 'kg\_%' loop
+    execute format('alter function %s set search_path = public, pg_temp', f.sig);
     execute format('revoke all on function %s from public', f.sig);
     if exists (select 1 from pg_roles where rolname = 'anon') then execute format('revoke all on function %s from anon', f.sig); end if;
     if exists (select 1 from pg_roles where rolname = 'authenticated') then execute format('revoke all on function %s from authenticated', f.sig); end if;
