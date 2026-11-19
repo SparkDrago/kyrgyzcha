@@ -1,0 +1,4 @@
+.devdb.json
+.env*
+node_modules
+*.zip

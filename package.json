@@ -1,0 +1,7 @@
+{
+  "name": "kyrgyzcha",
+  "private": true,
+  "description": "Learn Kyrgyz from zero to B2 — static app + zero-dependency Vercel functions",
+  "scripts": { "dev": "node dev-server.js" },
+  "engines": { "node": "22.x" }
+}
