@@ -481,6 +481,7 @@
     const main = A.main();
     const t = (href, glyph, title, text) => `<a class="tool" href="${href}"><span class="glyph">${glyph}</span><h3>${title}</h3><p>${text}</p></a>`;
     main.innerHTML = page('Tools', 'Куралдар', 'Everything that supports the course.') + `<div class="wrap" style="padding:30px 0 80px"><div class="tools tools-hub">
+      ${t('#dictionary', 'Сөз', 'Dictionary', (A.dictionaryIndex ? A.dictionaryIndex().length.toLocaleString() + ' words' : 'Every word') + ', searchable in Kyrgyz, Latin or English.')}
       ${t('#alphabet', 'Ө Ү Ң', 'Alphabet', 'All 36 letters, sounds and a reading drill.')}
       ${t('#machine', 'үй|лөр', 'Suffix machine', 'Build any noun or verb form, with reasons.')}
       ${t('#cheatsheet', '±', 'Cheat sheet', 'Every ending on one page.')}

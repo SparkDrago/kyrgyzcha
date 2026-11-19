@@ -33,6 +33,11 @@
     }));
     return WORDS;
   }
+  const GROUPS = [['everyday', 'Everyday life'], ['people', 'People & body'], ['places', 'Places & travel'], ['nature', 'Nature & animals'],
+    ['core', 'Words you’ll use everywhere'], ['time', 'Numbers & time'], ['phrases', 'Phrases']];
+  const OLD_GROUP = { greetings: 'phrases', food: 'everyday', fruit: 'everyday', animals: 'nature', family: 'people', jobs: 'people', body: 'people',
+    nature: 'nature', home: 'places', town: 'places', travel: 'places', clothes: 'everyday', colours: 'core', numbers: 'time', actions: 'core', describing: 'core' };
+  D.topics.forEach((t) => { if (!t.group) t.group = OLD_GROUP[t.id] || 'everyday'; });
   const topicWords = (t) => t.words.map((k) => words().get(k)).filter(Boolean);
   const topicById = (id) => D.topics.find((t) => t.id === id);
 
@@ -130,14 +135,15 @@
             <div><dt>Minutes spent</dt><dd>${Math.round(st.dropsMin || 0)}</dd></div>
           </dl>
         </div>
-        <h2 class="drops-h">Topics</h2>
-        <div class="topic-grid">${D.topics.map((t) => { const tp = progress(topicWords(t)); return `
+        <h2 class="drops-h">Topics <small>${D.topics.length} decks · ${p.total.toLocaleString()} words</small></h2>
+        ${GROUPS.map(([gid, gname]) => { const list = D.topics.filter((t) => t.group === gid); return list.length ? `<h3 class="drops-g">${esc(gname)}</h3>
+        <div class="topic-grid">${list.map((t) => { const tp = progress(topicWords(t)); return `
           <a class="topic" href="#drops-${t.id}" style="--tc:${t.color}">
             <span class="topic-icon" aria-hidden="true">${t.icon}</span>
             <span class="topic-name">${esc(t.name)}</span><span class="topic-kg" lang="ky">${esc(t.kg)}</span>
             <span class="topic-bar" aria-hidden="true"><i style="width:${(tp.seen / tp.total) * 100}%"></i></span>
             <span class="topic-meta">${tp.seen === tp.total ? 'All learned' : `${tp.seen} of ${tp.total} words`}${tp.due ? ` · <b>${tp.due} to refresh</b>` : ''}</span>
-          </a>`; }).join('')}</div>
+          </a>`; }).join('')}</div>` : ''; }).join('')}
         <section class="drops-how">
           <h2 class="drops-h">How a drop works</h2>
           <ul>

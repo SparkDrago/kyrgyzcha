@@ -35,7 +35,25 @@
   (window.READERS || []).forEach((r) => (r.glossary || []).forEach((g) => String(g[0]).split(/\s*\/\s*/).forEach((p, i, arr) => addDict(p, arr.length > 1 ? (String(g[1]).split(/\s*\/\s*/)[i] || g[1]) : g[1], 'reader'))));
   (window.READ_DRILL || []).forEach((w) => addDict(w[0], w[1], 'alphabet'));
   [['мен', 'I'], ['сен', 'you (friendly)'], ['сиз', 'you (polite)'], ['ал', 'he, she, it; that'], ['биз', 'we'], ['силер', 'you all'], ['алар', 'they'], ['бул', 'this'], ['ошол', 'that'], ['жана', 'and'], ['менен', 'with; and'], ['үчүн', 'for'], ['да', 'too, also'], ['бирок', 'but'], ['эле', 'just; was'], ['деп', 'saying (quote marker)'], ['экен', 'it turns out'], ['бол', 'be, become'], ['кыл', 'do'], ['де', 'say'], ['бер', 'give'], ['ал', 'take'], ['кел', 'come'], ['бар', 'go; there is'], ['жок', 'no; there isn’t'], ['эмес', 'not'], ['керек', 'needed'], ['абдан', 'very'], ['көп', 'many, a lot'], ['чоң', 'big'], ['жаңы', 'new'], ['жыл', 'year'], ['күн', 'day; sun'], ['адам', 'person'], ['эл', 'people, nation'], ['өлкө', 'country'], ['шаар', 'city'], ['тил', 'language'], ['иш', 'work'], ['жер', 'place, land'], ['убакыт', 'time'], ['сөз', 'word'], ['дагы', 'also; more']].forEach(([k, v]) => addDict(k, v, 'core'));
+  // Bigger dictionary: Word drops picture words, then the lexicon (Wiktionary, Peace Corps manual, course lists).
+  ((window.DROPS && window.DROPS.extra) || []).forEach((x) => addDict(x[0], x[1], 'Word drops'));
+  const BACKV = 'аоуыяёю', VOW = 'аоуыяёюеэиөү';
+  function verbStems(lemma) { // Wiktionary lists verbs as verbal nouns: иштөө → иште-, сыйлоо → сыйла-, салуу → сал-
+    const b = lemma.toLowerCase(), base = b.slice(0, -2), end = b.slice(-2), out = new Set();
+    let lastV = ''; for (const ch of base) if (VOW.includes(ch)) lastV = ch;
+    const back = BACKV.includes(lastV);
+    if (end === 'уу' || end === 'үү') { out.add(base); out.add(b.slice(0, -1)); }
+    else { (back ? ['а', 'о'] : ['е', 'ө']).forEach((v) => out.add(base + v)); out.add(b.slice(0, -1)); }
+    return [...out].filter((x) => x.length >= 3);
+  }
+  const LEX_LABEL = { wk: 'Wiktionary', pc: 'Peace Corps manual', kc: 'Кыргызча' };
+  ((window.LEXICON && window.LEXICON.rows) || []).forEach(([w, en, pos, src]) => {
+    const label = LEX_LABEL[String(src).split(',')[0]] || 'dictionary';
+    addDict(w, en, label);
+    if (pos === 'v' && /(уу|үү|оо|өө)$/.test(w) && !w.includes(' ')) verbStems(w).forEach((st) => addDict(st, en, label));
+  });
   A.DICT = DICT;
+  A.verbStems = verbStems;
 
   /* ------------------------------ Lemmatizer ------------------------------ */
   // Peel endings off the right, keep only stems found in the dictionary.
@@ -231,7 +249,7 @@
       panel.hidden = false;
       panel.innerHTML = `<button class="wp-close" aria-label="Close">×</button>
         <div class="wp-word"><span class="kg">${esc(el.textContent)}</span> ${sayBtn(el.textContent)}</div>${tl(key)}
-        <div class="wp-mean">${exact ? exact.map((x) => `<div>${esc(x.en)}</div>`).join('') : an.length ? an.map((x) => `<div class="an"><span class="kg">${esc(x.stem)}</span>${x.rest ? `<span class="m m1">-${esc(x.rest)}</span>` : ''} — ${esc(x.en[0].en)}</div>`).join('') + '<div class="voice-note">Best guess from the endings. Check it in context.</div>' : '<div class="voice-note">Not in the built-in dictionary yet. Try the links below and add your own meaning.</div>'}</div>
+        <div class="wp-mean">${exact ? exact.map((x) => `<div>${esc(x.en)} <small class="wp-src">${esc(/^[0-9]/.test(x.src) ? 'Lesson ' + x.src : x.src)}</small></div>`).join('') : an.length ? an.map((x) => `<div class="an"><span class="kg">${esc(x.stem)}</span>${x.rest ? `<span class="m m1">-${esc(x.rest)}</span>` : ''} — ${esc(x.en[0].en)}</div>`).join('') + '<div class="voice-note">Best guess from the endings. Check it in context.</div>' : '<div class="voice-note">Not in the built-in dictionary yet. Try the links below and add your own meaning.</div>'}</div>
         ${A.arHint(key)}
         <label class="lbl" for="wp-note">Your meaning</label><textarea id="wp-note" rows="2" placeholder="Type a meaning or a note">${esc(e.m || '')}</textarea>
         <div class="wp-status" role="group" aria-label="How well do you know it?">${[1, 2, 3, 4].map((n) => `<button data-s="${n}" aria-pressed="${s === n}" title="${STATUS[n]}">${n}</button>`).join('')}<button data-s="5" class="known" aria-pressed="${s === 5}">✓ Known</button><button data-s="-1" class="ign" aria-pressed="${s === -1}" title="Names, numbers, words you don’t want to count">Ignore</button></div>

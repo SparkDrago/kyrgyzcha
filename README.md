@@ -14,10 +14,12 @@ No framework and no build step. The front end is plain HTML/CSS/JS; the back end
 - **Study plan**: pick a level, minutes a day and days a week → daily XP goal and a finish date.
 - **Today dashboard**: goal ring, streak, next lesson, due reviews, weekly chart, plan progress.
 - **Smart review** (spaced repetition with mixed exercise types: meaning, reverse, typing, listening), **Fix my mistakes**, **flashcards**, **My words** with word strength.
-- **Word drops** (Drops-style): 3, 5 or 10-minute picture sessions across 16 topics (287 words). Swipe away words you know; tap the picture, pick the word, listen, build it from letter blocks and match pairs. Learned words join Smart review.
+- **Word drops** (Drops-style): 3, 5 or 10-minute picture sessions across 43 topics in 7 groups (723 words, every one with a picture: emoji, colour swatch, numeral or flag). Swipe away words you know; tap the picture, pick the word, listen, build it from letter blocks and match pairs. Learned words join Smart review.
 - **Speaking practice**: listen, record yourself, play back, optional speech-recognition check.
 - **Community**: 14 writing prompts (A1–B2); other learners and native speakers correct your text, with highlighted edits; mark corrections as helpful; report button.
 - **Weekly league** (opt-out) and **level tests with printable certificates** for A1, A1+, A2, B1, B2.
+
+**Dictionary**: about 3,000 Kyrgyz words and phrases, searchable in Kyrgyz, Latin letters or English. Type a word with endings (китептеримден) and it finds the stem. Any word can be added to your review deck. The same dictionary powers tap-a-word lookups in the reader.
 
 **Library (LingQ-style)**
 - Every word in a text has a status: **new** (blue) → **learning 1–4** (yellow) → **known**.
@@ -97,7 +99,8 @@ kyrgyzcha/
 │   ├── reader.js                 library, word statuses, dictionary + ending analyser, imports
 │   ├── learn.js                  dashboard, plan, placement, review, speaking, community, certificates
 │   ├── drops.js                  word drops: picture topics, timed sessions, letter blocks, pairs
-│   └── data/                     course content, readers, Arabic data, drops topics + pictures
+│   ├── dictionary.js             searchable dictionary (Kyrgyz / Latin / English, stem finder)
+│   └── data/                     course content, readers, Arabic data, drops topics + pictures, lexicon.js
 ├── api/                          Vercel serverless functions (Node, no dependencies)
 │   ├── _lib/core.js              Supabase client, sessions, passwords, rate limits
 │   ├── auth.js                   sign up / in / out, profile, password, delete account
@@ -128,6 +131,13 @@ kyrgyzcha/
 - There are no emails, so no "forgot password" link. The site owner can delete the person's row in `kg_users` (this also deletes their data) so they can sign up again.
 - Audio uses the device's built-in voices (see "About the audio" in the app).
 - Speech recognition for Kyrgyz depends on the browser.
+
+## Dictionary sources and credits
+- **English Wiktionary**, Kyrgyz entries (about 2,000), CC BY-SA 3.0, extracted by kaikki.org/wiktextract and packaged by [Vuizur/Wiktionary-Dictionaries](https://github.com/Vuizur/Wiktionary-Dictionaries). `js/data/lexicon.js` is therefore shared under CC BY-SA 3.0.
+- **Peace Corps Kyrgyzstan, *Kyrgyz Language Manual*** (compiled by M. Abylkasymova and G. Jumabaeva, Bishkek, June 1997; ERIC ED461284), about 500 words and phrases transcribed from its vocabulary lists.
+- Lists compiled for this course (about 360 words: animals, kitchen, sport, technology, countries, months…).
+
+Source lists and the build script live in `data-src/` (not deployed). To add words, edit `data-src/kc_vocab.tsv` (kyrgyz, english, part of speech, topic, picture) and re-run `data-src/build_lexicon.py`.
 
 ## Editing content
 Lessons are plain objects in `js/data/course-*.js`. Copy a lesson and edit it. `[[текст]]` marks Kyrgyz (tappable, with Latin help), `|` splits a word into coloured endings (`үй|лөр|үбүз|дө`), and in multiple-choice questions the **first option is the correct one** (options are shuffled on screen). After editing, bump `CACHE` in `sw.js` so installed apps fetch the new files.
