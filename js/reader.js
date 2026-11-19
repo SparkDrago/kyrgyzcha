@@ -173,7 +173,7 @@
       <div class="narrow" style="padding:30px 0 80px"><form class="panel import-form" novalidate>
         <div class="field"><label for="im-title">Title</label><input id="im-title" type="text" maxlength="120" placeholder="e.g. Бүгүнкү жаңылыктар" style="font-family:var(--f-kg)"></div>
         <div class="field"><span class="lbl">Level (your guess)</span><div class="seg" data-seg="lvl">${['A1', 'A2', 'B1', 'B2', 'C1'].map((l, i) => `<button type="button" data-v="${l}" aria-pressed="${i === 2}">${l}</button>`).join('')}</div></div>
-        <div class="field"><label for="im-src">Source link (optional)</label><input id="im-src" type="text" maxlength="300" placeholder="https://…" style="font-family:var(--f-ui);font-size:1rem"></div>
+        <div class="field"><label for="im-src">Source link (optional)</label><input class="input" id="im-src" type="url" maxlength="300" placeholder="https://…"></div>
         <div class="field"><label for="im-text">Text</label><textarea id="im-text" rows="12" maxlength="30000" placeholder="Paste Kyrgyz text here"></textarea><div class="preview"><span class="cc">0</span> / 30,000 characters · <button type="button" class="linkish" data-sample>Try a sample text</button></div></div>
         <div class="form-msg" role="alert"></div>
         <button class="btn btn-ink" type="submit">Save to my library</button>

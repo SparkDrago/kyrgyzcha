@@ -107,30 +107,49 @@
   const ago = (t) => { if (!t) return 'never'; const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : new Date(t).toLocaleString(); };
   A.ROUTES.account = function account() {
     const main = A.main();
-    const head = `<header class="page-head"><div class="wrap"><h1>Your account</h1><div class="kgt">Аккаунт</div><p>Sign in to keep your progress safe and continue on any device — phone, tablet or computer.</p></div></header>`;
+    const head = `<header class="page-head"><div class="wrap"><h1>Your account</h1><div class="kgt">Аккаунт</div><p>${cloud.user ? 'Your progress saves to your account automatically, so you can pick up on any phone, tablet or computer.' : 'Sign in to keep your progress safe and continue on any device — phone, tablet or computer.'}</p></div></header>`;
     if (cloud.available === false) {
       main.innerHTML = head + `<div class="narrow" style="padding:36px 0 80px">${cloud.serverError ? A.BLOCK.warn({ title: 'The server needs setting up', html: esc(cloud.serverError) }) : ''}${A.BLOCK.tip({ title: 'Guest mode', html: 'This copy of the app is running without its server — for example as a preview or straight from a file — so accounts, sync and the community are switched off. Everything you do is still saved on this device.<br><br>Once it’s deployed on Vercel with a database (see the README), this page lets you create an account.' })}${installBlock()}</div>`;
       return;
     }
     if (!cloud.user) {
-      main.innerHTML = head + `<div class="narrow" style="padding:36px 0 80px"><div class="auth-card panel">
-        <div class="seg" role="tablist" style="margin-bottom:18px"><button data-tab="in" aria-pressed="true">Sign in</button><button data-tab="up" aria-pressed="false">Create account</button></div>
-        <form class="auth-form" novalidate>
-          <div class="field up-only hide"><label for="au-name">Your name (shown in the community)</label><input id="au-name" type="text" autocomplete="nickname" maxlength="40" style="font-family:var(--f-ui);font-size:1rem"></div>
-          <div class="field"><label for="au-email">Email</label><input id="au-email" type="email" autocomplete="email" required style="font-family:var(--f-ui);font-size:1rem"></div>
-          <div class="field"><label for="au-pw">Password</label><input id="au-pw" type="password" autocomplete="current-password" minlength="8" required style="font-family:var(--f-ui);font-size:1rem"><div class="preview up-only hide">At least 8 characters.</div></div>
-          <label class="check up-only hide"><input id="au-native" type="checkbox"> I’m a native or fluent Kyrgyz speaker (you’ll get a badge when correcting others)</label>
-          <div class="form-msg" role="alert"></div>
-          <button class="btn btn-ink" type="submit">Sign in</button>
-        </form>
-        <p class="voice-note" style="margin-top:16px">Your progress on this device is added to your account when you sign in. Forgot your password? This app doesn’t send emails, so create a new account — or ask the site owner to reset it.</p>
-      </div>${installBlock()}</div>`;
+      const tunduk = `<svg class="auth-tunduk" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="20" cy="20" r="10" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M14 11.5c2 5 2 12 0 17M20 10v20M26 11.5c-2 5-2 12 0 17M11.5 14c5 2 12 2 17 0M10 20h20M11.5 26c5-2 12-2 17 0" fill="none" stroke="currentColor" stroke-width="1"/></svg>`;
+      main.innerHTML = `<section class="auth-wrap"><div class="wrap"><div class="auth-split">
+        <div class="auth-side">
+          ${tunduk}
+          <p class="auth-hello" lang="ky">Кош келиңиз!</p>
+          <p class="auth-hello-en">Welcome. Sign in to keep your progress safe.</p>
+          <ul class="auth-perks">
+            <li><b>Any device.</b> Start a lesson on your laptop, finish it on your phone.</li>
+            <li><b>Real corrections.</b> Post a few sentences and native speakers fix them.</li>
+            <li><b>Weekly league.</b> Earn XP and see how you rank (you can opt out).</li>
+          </ul>
+        </div>
+        <div class="auth-main">
+          <div class="auth-tabs" role="tablist" aria-label="Account"><button type="button" role="tab" data-tab="in" aria-selected="true" aria-pressed="true">Sign in</button><button type="button" role="tab" data-tab="up" aria-selected="false" aria-pressed="false">Create account</button></div>
+          <form class="auth-form" novalidate>
+            <div class="field up-only hide"><label for="au-name">Your name</label><input class="input" id="au-name" type="text" autocomplete="nickname" maxlength="40" placeholder="Shown next to your community posts"></div>
+            <div class="field"><label for="au-email">Email</label><input class="input" id="au-email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+            <div class="field"><label for="au-pw">Password</label><div class="pw-wrap"><input class="input" id="au-pw" type="password" autocomplete="current-password" minlength="8" required><button type="button" class="pw-toggle" aria-label="Show password" aria-pressed="false">Show</button></div><div class="hint up-only hide">At least 8 characters.</div></div>
+            <label class="check up-only hide"><input id="au-native" type="checkbox"> I’m a native or fluent Kyrgyz speaker. You’ll get a badge when you correct others.</label>
+            <div class="form-msg" role="alert"></div>
+            <button class="btn btn-ink auth-submit" type="submit">Sign in</button>
+          </form>
+          <p class="auth-foot">Anything you’ve done on this device is added to your account when you sign in. Forgot your password? The app can’t send emails, so make a new account or ask the site owner to reset it.</p>
+        </div>
+      </div><div class="auth-install">${installBlock()}</div></div></section>`;
+      main.querySelector('.pw-toggle').addEventListener('click', (e) => {
+        const b = e.currentTarget, i = $('#au-pw'), show = i.type === 'password';
+        i.type = show ? 'text' : 'password'; b.textContent = show ? 'Hide' : 'Show';
+        b.setAttribute('aria-pressed', String(show)); b.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); i.focus();
+      });
       let mode = 'in';
       const form = $('.auth-form', main);
       main.addEventListener('click', (e) => {
         const t = e.target.closest('[data-tab]'); if (!t) return;
         mode = t.dataset.tab;
-        main.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-pressed', String(x === t)));
+        main.querySelectorAll('[data-tab]').forEach((x) => { x.setAttribute('aria-pressed', String(x === t)); x.setAttribute('aria-selected', String(x === t)); });
+        $('.form-msg', main).textContent = '';
         main.querySelectorAll('.up-only').forEach((x) => x.classList.toggle('hide', mode !== 'up'));
         $('#au-pw').setAttribute('autocomplete', mode === 'up' ? 'new-password' : 'current-password');
         form.querySelector('[type=submit]').textContent = mode === 'up' ? 'Create account' : 'Sign in';
@@ -138,14 +157,21 @@
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const msg = $('.form-msg', main), btn = form.querySelector('[type=submit]');
-        msg.textContent = ''; btn.disabled = true;
+        msg.textContent = '';
+        const email = $('#au-email').value.trim(), pw = $('#au-pw').value;
+        const miss = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? ['#au-email', email ? 'That email doesn’t look right. Check for typos.' : 'Enter your email.']
+          : !pw ? ['#au-pw', 'Enter your password.']
+          : mode === 'up' && pw.length < 8 ? ['#au-pw', 'Your password needs at least 8 characters.'] : null;
+        form.querySelectorAll('.input').forEach((i) => i.removeAttribute('aria-invalid'));
+        if (miss) { const f = $(miss[0]); f.setAttribute('aria-invalid', 'true'); f.focus(); msg.textContent = miss[1]; return; }
+        btn.disabled = true; const label = btn.textContent; btn.textContent = mode === 'up' ? 'Creating account…' : 'Signing in…';
         try {
-          const body = { email: $('#au-email').value, password: $('#au-pw').value };
+          const body = { email, password: pw };
           if (mode === 'up') Object.assign(body, { name: $('#au-name').value, native: $('#au-native').checked });
           const r = await api('/api/auth?a=' + (mode === 'up' ? 'signup' : 'login'), { method: 'POST', body });
           await signedIn(r.user, true);
           location.hash = '#home';
-        } catch (err) { msg.textContent = err.message; btn.disabled = false; }
+        } catch (err) { msg.textContent = err.message; btn.disabled = false; btn.textContent = label; }
       });
       return;
     }
@@ -156,17 +182,17 @@
         <p><span class="sync-dot ${esc(cloud.status)}"></span> ${esc(statusText)} · last sync ${esc(ago(cloud.lastSync))}</p>
         <div class="quiz-actions"><button class="btn btn-line btn-sm" data-acc="sync">Sync now</button><button class="btn btn-line btn-sm" data-acc="export">Copy my data</button><button class="btn btn-ink btn-sm" data-acc="logout">Sign out</button></div></section>
       <section class="panel" style="margin-bottom:20px"><h3>Profile</h3>
-        <div class="field"><label for="pf-name">Name</label><input id="pf-name" type="text" maxlength="40" value="${esc(u.name)}" style="font-family:var(--f-ui);font-size:1rem"></div>
+        <div class="field"><label for="pf-name">Name</label><input class="input" id="pf-name" type="text" maxlength="40" value="${esc(u.name)}"></div>
         <label class="check"><input id="pf-native" type="checkbox" ${u.native ? 'checked' : ''}> I’m a native or fluent Kyrgyz speaker</label>
         <label class="check"><input id="pf-board" type="checkbox" ${u.board ? 'checked' : ''}> Show me in the weekly league</label>
         <div class="quiz-actions"><button class="btn btn-ink btn-sm" data-acc="profile">Save profile</button></div></section>
       <section class="panel" style="margin-bottom:20px"><h3>Password</h3>
-        <div class="field"><label for="pw-old">Current password</label><input id="pw-old" type="password" autocomplete="current-password" style="font-family:var(--f-ui);font-size:1rem"></div>
-        <div class="field"><label for="pw-new">New password</label><input id="pw-new" type="password" autocomplete="new-password" style="font-family:var(--f-ui);font-size:1rem"></div>
+        <div class="field"><label for="pw-old">Current password</label><input class="input" id="pw-old" type="password" autocomplete="current-password"></div>
+        <div class="field"><label for="pw-new">New password</label><input class="input" id="pw-new" type="password" autocomplete="new-password"></div>
         <div class="quiz-actions"><button class="btn btn-line btn-sm" data-acc="password">Change password</button><button class="btn btn-line btn-sm" data-acc="logout-all">Sign out on all devices</button></div></section>
       ${installBlock()}
       <section class="panel danger"><h3>Delete account</h3><p class="voice-note">Removes your account, progress, texts and community posts from the server. This can’t be undone.</p>
-        <div class="field"><label for="del-pw">Type your password to confirm</label><input id="del-pw" type="password" autocomplete="current-password" style="font-family:var(--f-ui);font-size:1rem"></div>
+        <div class="field"><label for="del-pw">Type your password to confirm</label><input class="input" id="del-pw" type="password" autocomplete="current-password"></div>
         <button class="btn btn-line btn-sm" data-acc="delete" style="color:var(--red);border-color:var(--red)">Delete my account</button></section>
       <div class="form-msg" role="alert" style="margin-top:14px"></div></div>`;
     const msg = (t) => { $('.form-msg', main).textContent = t; };
