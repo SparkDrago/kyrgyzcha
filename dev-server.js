@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* Local development server: serves the site and runs /api/*.js exactly like Vercel does.
-   Data goes to .devdb.json in this folder unless Upstash env vars are set.
-   Usage:  node dev-server.js        then open http://localhost:3000 */
+   Accounts need a Supabase project: set SUPABASE_URL and SUPABASE_SECRET_KEY first
+   (without them the app runs in guest mode, saving progress on the device).
+   Usage:  SUPABASE_URL=… SUPABASE_SECRET_KEY=… node dev-server.js   then open http://localhost:3000 */
 'use strict';
 const http = require('http');
 const fs = require('fs');
@@ -23,7 +24,7 @@ http.createServer(async (req, res) => {
   let p = path.normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
   if (p === '/' || p === '\\') p = '/index.html';
   const file = path.join(ROOT, p);
-  if (!file.startsWith(ROOT) || /\/(api|\.devdb)/.test(p) || p.includes('dev-server')) { res.statusCode = 404; return res.end('Not found'); }
+  if (!file.startsWith(ROOT) || /\/(api|supabase)\//.test(p) || p.includes('dev-server')) { res.statusCode = 404; return res.end('Not found'); }
   fs.readFile(file, (err, data) => {
     if (err) { res.statusCode = 404; return res.end('Not found'); }
     VHEAD.forEach((h) => { const re = new RegExp('^' + h.source.replace('(.*)', '.*') + '$'); if (re.test(url.pathname)) h.headers.forEach((x) => res.setHeader(x.key, x.value)); });

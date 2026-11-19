@@ -2,7 +2,7 @@
 
 A complete Kyrgyz learning app for English speakers: a structured course like **Busuu**, a reading library like **LingQ**, accounts that sync across devices, a community that corrects your writing, and an installable phone app — deployable to Vercel in about 10 minutes.
 
-No framework and no build step. The front end is plain HTML/CSS/JS; the back end is five small Vercel functions with **zero npm dependencies**, storing data in Upstash Redis.
+No framework and no build step. The front end is plain HTML/CSS/JS; the back end is five small Vercel functions with **zero npm dependencies**, storing data in **Supabase** (Postgres).
 
 ---
 
@@ -32,7 +32,7 @@ No framework and no build step. The front end is plain HTML/CSS/JS; the back end
 
 ## Deploy to Vercel — step by step (like you're five)
 
-You need two free accounts: **GitHub** (stores the files) and **Vercel** (runs the app). Vercel will create the database for you.
+You need free accounts on **GitHub** (stores the files) and **Vercel** (runs the app). Vercel creates the Supabase database for you.
 
 ### 1. Put the files on GitHub
 1. Unzip `kyrgyzcha.zip`.
@@ -46,10 +46,11 @@ You need two free accounts: **GitHub** (stores the files) and **Vercel** (runs t
 2. Framework preset: **Other**. Leave Build Command and Output Directory **empty**. Click **Deploy**.
 3. The site goes live, but accounts aren't on yet. That's steps 3–4.
 
-### 3. Add the database (Upstash Redis)
-1. In your Vercel project open the **Storage** tab (or **Integrations → Marketplace**) and choose **Upstash → Redis** ("Upstash for Redis").
-2. Create a database (the free plan is fine; pick a region close to your learners) and **connect it to the `kyrgyzcha` project**.
-3. Vercel adds the settings `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically. (The app also accepts `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`.)
+### 3. Add the database (Supabase)
+1. In your Vercel project open the **Storage** tab → **Create Database** → **Supabase** (from the Marketplace).
+2. Accept, pick the free plan and a region close to your learners, and **connect it to the `kyrgyzcha` project**.
+3. Vercel adds `SUPABASE_URL` and the secret key (`SUPABASE_SECRET_KEY`, or `SUPABASE_SERVICE_ROLE_KEY` on older projects) automatically.
+4. Create the tables: click **Open in Supabase** → **SQL Editor** → **New query**, paste the whole file [`supabase/schema.sql`](supabase/schema.sql) and press **Run**. You should see "Success. No rows returned". (Running it again later is safe.)
 
 ### 4. Add the session secret
 1. Project → **Settings → Environment Variables** → add:
@@ -65,6 +66,7 @@ Open your URL (e.g. `https://kyrgyzcha.vercel.app`) → **Sign in → Create acc
 
 **If something's wrong**, the app tells you:
 - "Database not connected" → step 3 wasn't connected to this project, or you didn't redeploy.
+- "The database tables are missing" → step 3.4: run `supabase/schema.sql` in the SQL Editor.
 - "SESSION_SECRET is missing" → step 4, then redeploy.
 
 **Custom domain:** Project → Settings → Domains.
@@ -75,9 +77,9 @@ Open your URL (e.g. `https://kyrgyzcha.vercel.app`) → **Sign in → Create acc
 
 ```bash
 cd kyrgyzcha
-node dev-server.js          # needs Node.js 18+; open http://localhost:3000
+SUPABASE_URL=https://xxxx.supabase.co SUPABASE_SECRET_KEY=sb_secret_xxx node dev-server.js   # Node 18+; open http://localhost:3000
 ```
-The dev server runs the same `/api` functions and stores data in `.devdb.json` (ignored by Git and Vercel). Double-clicking `index.html` also works, in guest mode.
+The dev server runs the same `/api` functions as Vercel. Without the two Supabase settings the app still runs, in guest mode. Double-clicking `index.html` also works, in guest mode.
 
 ---
 
@@ -95,15 +97,18 @@ kyrgyzcha/
 │   ├── learn.js                  dashboard, plan, placement, review, speaking, community, certificates
 │   └── data/                     course content, readers, Arabic data
 ├── api/                          Vercel serverless functions (Node, no dependencies)
-│   ├── _lib/core.js              Redis REST client, sessions, passwords, rate limits
+│   ├── _lib/core.js              Supabase client, sessions, passwords, rate limits
 │   ├── auth.js                   sign up / in / out, profile, password, delete account
 │   ├── state.js                  progress document (GET / PUT)
 │   ├── texts.js                  imported texts
 │   ├── community.js              posts, corrections, helpful, report, delete
 │   └── leaderboard.js            weekly XP league
+├── supabase/schema.sql           tables + SQL functions (run once in Supabase)
 ├── dev-server.js                 local server (not deployed)
 └── vercel.json, package.json
 ```
+
+**Data**: everything lives in Supabase tables (`kg_users`, `kg_progress`, `kg_texts`, `kg_posts`, `kg_corrections`, `kg_xp`…), which you can browse in Supabase's Table Editor. The browser never talks to Supabase: only the server functions do, with the secret key. Row Level Security is on and the public keys have no access.
 
 **Sync**: progress is one JSON document per learner. The client merges device and account copies field by field (lesson scores and XP take the maximum, flashcards and word statuses take the most recent), so studying offline on two devices doesn't lose anything.
 
@@ -114,10 +119,11 @@ kyrgyzcha/
 - Sign-up, sign-in, posting and syncing are rate-limited.
 - All user text is escaped before display.
 - Posts with 3 reports are hidden.
-- Deleting an account removes its data and posts.
+- Deleting an account removes all of its data (database cascades).
+- Moderation: hide a post by setting `reports` to 3 in the `kg_posts` table, or delete the row.
 
 **Known limits**
-- There are no emails, so no "forgot password" link. The site owner can delete the user's `email:` key in Upstash so the person can sign up again.
+- There are no emails, so no "forgot password" link. The site owner can delete the person's row in `kg_users` (this also deletes their data) so they can sign up again.
 - Audio uses the device's built-in voices (see "About the audio" in the app).
 - Speech recognition for Kyrgyz depends on the browser.
 
