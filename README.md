@@ -14,6 +14,7 @@ No framework and no build step. The front end is plain HTML/CSS/JS; the back end
 - **Study plan**: pick a level, minutes a day and days a week → daily XP goal and a finish date.
 - **Today dashboard**: goal ring, streak, next lesson, due reviews, weekly chart, plan progress.
 - **Smart review** (spaced repetition with mixed exercise types: meaning, reverse, typing, listening), **Fix my mistakes**, **flashcards**, **My words** with word strength.
+- **Word drops** (Drops-style): 3, 5 or 10-minute picture sessions across 16 topics (287 words). Swipe away words you know; tap the picture, pick the word, listen, build it from letter blocks and match pairs. Learned words join Smart review.
 - **Speaking practice**: listen, record yourself, play back, optional speech-recognition check.
 - **Community**: 14 writing prompts (A1–B2); other learners and native speakers correct your text, with highlighted edits; mark corrections as helpful; report button.
 - **Weekly league** (opt-out) and **level tests with printable certificates** for A1, A1+, A2, B1, B2.
@@ -95,7 +96,8 @@ kyrgyzcha/
 │   ├── cloud.js                  accounts, sync/merge, league XP, account page, install prompt
 │   ├── reader.js                 library, word statuses, dictionary + ending analyser, imports
 │   ├── learn.js                  dashboard, plan, placement, review, speaking, community, certificates
-│   └── data/                     course content, readers, Arabic data
+│   ├── drops.js                  word drops: picture topics, timed sessions, letter blocks, pairs
+│   └── data/                     course content, readers, Arabic data, drops topics + pictures
 ├── api/                          Vercel serverless functions (Node, no dependencies)
 │   ├── _lib/core.js              Supabase client, sessions, passwords, rate limits
 │   ├── auth.js                   sign up / in / out, profile, password, delete account

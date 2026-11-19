@@ -68,7 +68,8 @@
         <a class="dcard" href="#smart"><span class="lab">Smart review</span><b>${dk.due.length} due</b><span>${dk.fresh.length} new words waiting · ${dk.strength.weak} weak</span><span class="go">Review now</span></a>
         <a class="dcard" href="#library"><span class="lab">Library</span><b>${ws.known.toLocaleString()} known words</b><span>Read something new today</span><span class="go">Open library</span></a>
       </div>
-      <div class="dash-grid two">
+      <div class="dash-grid three">
+        ${A.dropsPlan ? (() => { const q = A.dropsPlan(); return `<a class="dcard drops-card" href="#drops"><span class="lab">Word drops</span><b>${q.due ? q.due + ' to refresh' : esc(q.t.icon) + ' ' + esc(q.t.name)}</b><span>${q.due ? 'Then new picture words' : q.fresh + ' new picture words'}</span><span class="go">Play 5 minutes</span></a>`; })() : ''}
         <div class="dcard light"><span class="lab">This week</span><div class="wbars">${wk.map((d) => `<div class="wb ${d.future ? 'fut' : ''} ${d.xp >= g ? 'met' : ''}"><i style="height:${Math.max(4, (d.xp / maxXP) * 100)}%"></i><span>${d.d.toLocaleDateString('en', { weekday: 'narrow' })}</span></div>`).join('')}</div>
           <span class="voice-note">${wk.filter((d) => d.xp >= g).length} of ${(plan && plan.days) || 5} goal days this week</span></div>
         <div class="dcard light"><span class="lab">Your plan</span>${plan ? `<b>Reach ${esc(plan.level)} by ${esc(pl.finish)}</b><div class="bar"><i style="width:${pl.pct}%"></i></div><span class="voice-note">${pl.done} of ${pl.total} lessons · ${plan.minutes} min a day, ${plan.days} days a week</span><a href="#goals">Change plan</a>`
@@ -170,7 +171,8 @@
     main.innerHTML = page('Review', 'Кайталоо', 'Little and often beats long and rare. Words come back just before you’d forget them.') + `<div class="wrap" style="padding:30px 0 80px">
       <div class="lib-stats"><div><b>${dk.due.length}</b>due now</div><div><b>${dk.strength.weak}</b>weak words</div><div><b>${dk.strength.medium}</b>medium</div><div><b>${dk.strength.strong}</b>strong</div><div><b>${m}</b>mistakes to fix</div></div>
       <div class="tools" style="margin-top:22px">
-        <a class="tool big" href="#smart"><span class="glyph">↻</span><h3>Smart review</h3><p>${dk.due.length || dk.fresh.length ? `About 5 minutes. ${dk.due.length} due words, then new ones from your lessons and library.` : 'Finish a lesson or mark words in the library first — then your review fills up.'}</p></a>
+        <a class="tool big" href="#smart"><span class="glyph">↻</span><h3>Smart review</h3><p>${dk.due.length || dk.fresh.length ? `About 5 minutes. ${dk.due.length} due words, then new ones from your lessons and library.` : dk.strength.weak + dk.strength.medium + dk.strength.strong ? 'All caught up. Your words come back here when they’re due.' : 'Finish a lesson, play a word drop or mark words in the library — then your review fills up.'}</p></a>
+        <a class="tool tool-drops" href="#drops"><span class="glyph">💧</span><h3>Word drops</h3><p>Five-minute picture sessions. ${A.dropsPlan ? (A.dropsPlan().due ? A.dropsPlan().due + ' words to refresh.' : 'Next topic: ' + esc(A.dropsPlan().t.name) + '.') : ''}</p></a>
         <a class="tool" href="#mistakes"><span class="glyph">✗→✓</span><h3>Fix my mistakes</h3><p>${m ? m + ' questions you got wrong in lessons.' : 'Nothing yet — mistakes from lesson tests land here.'}</p></a>
         <a class="tool" href="#cards"><span class="glyph">▭</span><h3>Flashcards</h3><p>Classic flip cards with Again / Hard / Good / Easy.</p></a>
         <a class="tool" href="#speak"><span class="glyph">🎙</span><h3>Speaking practice</h3><p>Listen, record yourself, compare.</p></a>

@@ -1,8 +1,8 @@
 /* Offline support: cache the app shell; never cache the API. */
-const CACHE = 'kyrgyzcha-v5';
-const CORE = ['./', 'index.html', 'css/style.css', 'favicon.svg', 'manifest.webmanifest', 'js/kg.js', 'js/app.js', 'js/cloud.js', 'js/reader.js', 'js/learn.js',
+const CACHE = 'kyrgyzcha-v6';
+const CORE = ['./', 'index.html', 'css/style.css', 'favicon.svg', 'manifest.webmanifest', 'js/kg.js', 'js/app.js', 'js/cloud.js', 'js/reader.js', 'js/learn.js', 'js/drops.js',
   'js/data/alphabet.js', 'js/data/course-0-1.js', 'js/data/course-2.js', 'js/data/course-3.js', 'js/data/course-4.js', 'js/data/course-5.js', 'js/data/course-6.js',
-  'js/data/readers.js', 'js/data/arabic.js', 'js/data/arabic-logic.js', 'icons/icon-192.png', 'icons/icon-512.png'];
+  'js/data/readers.js', 'js/data/arabic.js', 'js/data/arabic-logic.js', 'js/data/drops.js', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
